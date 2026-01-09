@@ -149,7 +149,7 @@ Linked to student account
 
 Can be downloaded or verified later
 
-🔒 Security
+🔒 Security.
 
 Backend handles authentication
 
