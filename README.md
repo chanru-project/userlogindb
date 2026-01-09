@@ -63,7 +63,8 @@ futureeducation/
 │   ├── public/
 │   ├── package.json
 │   └── vite.config.js
-│
+
+
 ├── backend/
 │   ├── routes/
 │   ├── controllers/
@@ -74,7 +75,7 @@ futureeducation/
 
 ⚙️ Installation & Setup
 1️⃣ Clone the Repository
-git clone https://github.com/your-username/futureeducation.git
+git clone https://github.com/chanru-project/userlogindb.git
 cd futureeducation
 
 2️⃣ Frontend Setup
