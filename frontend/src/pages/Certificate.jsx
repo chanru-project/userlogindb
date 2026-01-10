@@ -8,6 +8,7 @@ function Certificate() {
   const location = useLocation();
   const navigate = useNavigate();
   const course = location.state?.course || null;
+  const videoCompleted = location.state?.videoCompleted || false;
   const [userName, setUserName] = useState('');
   const certificateRef = useRef(null);
 
@@ -81,6 +82,26 @@ function Certificate() {
           </button>
 
           <h1 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>🎓 Certificate Generator</h1>
+
+          {/* Video Completion Status */}
+          {videoCompleted && (
+            <div style={{ backgroundColor: '#d4edda', border: '2px solid #28a745', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ fontSize: '1.5rem' }}>✅</span>
+              <div>
+                <strong style={{ color: '#155724' }}>Video Completed!</strong>
+                <p style={{ color: '#155724', margin: '0.25rem 0 0 0', fontSize: '0.9rem' }}>You have successfully completed the {course.title} course video. You are eligible for the certificate!</p>
+              </div>
+            </div>
+          )}
+          {!videoCompleted && (
+            <div style={{ backgroundColor: '#fff3cd', border: '2px solid #ffc107', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+              <div>
+                <strong style={{ color: '#856404' }}>Video Not Completed</strong>
+                <p style={{ color: '#856404', margin: '0.25rem 0 0 0', fontSize: '0.9rem' }}>Please go back and watch the full course video to unlock your certificate.</p>
+              </div>
+            </div>
+          )}
 
           {/* Input Section */}
           <div style={{ backgroundColor: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem' }}>

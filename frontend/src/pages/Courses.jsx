@@ -1,11 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 
 function Courses() {
   const [expandedId, setExpandedId] = useState(null);
+  const [completedVideos, setCompletedVideos] = useState({});
+  const [videoDuration, setVideoDuration] = useState({});
+  const videoRefs = useRef({});
+  const videoPlayersRef = useRef({});
   const navigate = useNavigate();
+
+  // Initialize YouTube IFrame API
+  useEffect(() => {
+    // Load YouTube API
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+
+    // Store reference to window.onYouTubeIframeAPIReady
+    window.onYouTubeIframeAPIReady = initializeYouTubePlayers;
+
+    return () => {
+      delete window.onYouTubeIframeAPIReady;
+    };
+  }, []);
+
+  const initializeYouTubePlayers = () => {
+    courses.forEach(course => {
+      if (videoRefs.current[course.id]) {
+        try {
+          const player = new window.YT.Player(videoRefs.current[course.id], {
+            events: {
+              onReady: (event) => handleVideoReady(event, course.id),
+              onStateChange: (event) => handleVideoStateChange(event, course.id)
+            }
+          });
+          videoPlayersRef.current[course.id] = player;
+        } catch (e) {
+          console.log('YouTube API not ready yet');
+        }
+      }
+    });
+  };
+
+  const handleVideoReady = (event, courseId) => {
+    const duration = event.target.getDuration();
+    setVideoDuration(prev => ({
+      ...prev,
+      [courseId]: duration
+    }));
+  };
+
+  const handleVideoStateChange = (event, courseId) => {
+    // Video is playing
+    if (event.data === window.YT.PlayerState.PLAYING) {
+      const checkProgress = setInterval(() => {
+        const player = videoPlayersRef.current[courseId];
+        if (!player) {
+          clearInterval(checkProgress);
+          return;
+        }
+
+        const currentTime = player.getCurrentTime();
+        const duration = player.getDuration();
+        const progress = currentTime / duration;
+
+        // Mark as completed when 95% or more is watched
+        if (progress >= 0.95 && !completedVideos[courseId]) {
+          setCompletedVideos(prev => ({
+            ...prev,
+            [courseId]: true
+          }));
+          clearInterval(checkProgress);
+        }
+
+        // Stop checking after 5 minutes of play to save resources
+        if (currentTime > 300) {
+          clearInterval(checkProgress);
+        }
+      }, 2000); // Check every 2 seconds
+
+      // Clear interval when video stops
+      const intervalId = setTimeout(() => clearInterval(checkProgress), 3600000); // 1 hour max
+    }
+  };
 
   const courses = [
     {
@@ -16,7 +98,9 @@ function Courses() {
       icon: '💻',
       topics: ['Data Structures', 'Algorithms', 'Web Dev', 'AI/ML', 'Databases'],
       outcomes: ['Build full-stack apps', 'Develop AI models', 'Manage large-scale systems'],
-      projects: ['E-commerce platform', 'Chat app', 'ML recommendation engine']
+      projects: ['E-commerce platform', 'Chat app', 'ML recommendation engine'],
+      videoUrl: 'https://www.youtube.com/embed/K5KVEU3aaeQ',
+      videoDuration: 3600 // 1 hour in seconds
     },
     {
       id: 2,
@@ -26,17 +110,21 @@ function Courses() {
       icon: '📊',
       topics: ['Management', 'Finance', 'Marketing', 'Entrepreneurship', 'Analytics'],
       outcomes: ['Lead teams', 'Strategic planning', 'Financial analysis'],
-      projects: ['Business plan', 'Marketing strategy', 'Startup pitch']
+      projects: ['Business plan', 'Marketing strategy', 'Startup pitch'],
+      videoUrl: 'https://www.youtube.com/embed/fpK25UY_0iA',
+      videoDuration: 3600
     },
     {
       id: 3,
-      title: 'Engineering',
+      title: ' AI Engineering',
       duration: '4 Years',
       level: 'Undergraduate',
       icon: '⚙️',
       topics: ['Mechanics', 'Circuits', 'CAD Design', 'Thermodynamics', 'Materials'],
       outcomes: ['Design structures', 'Solve complex problems', 'Prototype solutions'],
-      projects: ['Bridge design', 'Circuit board', 'Mechanical device']
+      projects: ['Bridge design', 'Circuit board', 'Mechanical device'],
+      videoUrl: 'https://www.youtube.com/embed/9tbaiFIm0HU',
+      videoDuration: 3600
     },
     {
       id: 4,
@@ -46,7 +134,9 @@ function Courses() {
       icon: '📈',
       topics: ['Machine Learning', 'Statistics', 'Big Data', 'Python/R', 'Visualization'],
       outcomes: ['Extract insights', 'Predict trends', 'Optimize decisions'],
-      projects: ['Predictive model', 'Data dashboard', 'Classification system']
+      projects: ['Predictive model', 'Data dashboard', 'Classification system'],
+      videoUrl: 'https://www.youtube.com/embed/ua-CiDNNj30',
+      videoDuration: 3600
     },
     {
       id: 5,
@@ -56,7 +146,9 @@ function Courses() {
       icon: '📱',
       topics: ['SEO', 'Social Media', 'Content Strategy', 'Analytics', 'Paid Ads'],
       outcomes: ['Boost brand presence', 'Drive conversions', 'Analyze campaigns'],
-      projects: ['Social campaign', 'Marketing plan', 'Analytics report']
+      projects: ['Social campaign', 'Marketing plan', 'Analytics report'],
+      videoUrl: 'https://www.youtube.com/embed/kunkYTKFNtI',
+      videoDuration: 3600
     },
     {
       id: 6,
@@ -66,7 +158,9 @@ function Courses() {
       icon: '🌐',
       topics: ['HTML/CSS', 'JavaScript', 'React', 'Node.js', 'Databases'],
       outcomes: ['Build responsive sites', 'Create interactive apps', 'Deploy live'],
-      projects: ['Portfolio site', 'Todo app', 'Full-stack project']
+      projects: ['Portfolio site', 'Todo app', 'Full-stack project'],
+      videoUrl: 'https://www.youtube.com/embed/7dSJubxFWv0',
+      videoDuration: 3600
     }
   ];
 
@@ -75,7 +169,7 @@ function Courses() {
   };
 
   const handleCertificate = (course) => {
-    navigate('/certificate', { state: { course } });
+    navigate('/certificate', { state: { course, videoCompleted: completedVideos[course.id] } });
   };
 
   return (
@@ -105,7 +199,7 @@ function Courses() {
               >
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
-                  <div style={{ cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); handleCertificate(course); }}>
+                  <div style={{ cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); toggleExpand(course.id); }}>
                     <span style={{ fontSize: '2rem', cursor: 'pointer', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                       {course.icon}
                     </span>
@@ -152,6 +246,40 @@ function Courses() {
                 {/* Expanded Content */}
                 {expandedId === course.id && (
                   <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e0e0e0' }}>
+                    {/* Course Video Section */}
+                    <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                      <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#007bff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        🎥 Course Video Lesson (1 Hour)
+                      </h4>
+                      <div style={{ position: 'relative', paddingBottom: '56.25%', height: '0', overflow: 'hidden', borderRadius: '8px', marginBottom: '0.75rem', backgroundColor: '#000' }}>
+                        <iframe
+                          id={`video-player-${course.id}`}
+                          ref={(el) => { videoRefs.current[course.id] = el; }}
+                          style={{
+                            position: 'absolute',
+                            top: '0',
+                            left: '0',
+                            width: '100%',
+                            height: '100%',
+                            border: 'none',
+                            borderRadius: '8px'
+                          }}
+                          src={course.videoUrl + '?enablejsapi=1&modestbranding=1&rel=0'}
+                          title={`${course.title} Course Video`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                        <span style={{ color: '#666' }}>📺 Watch the full video to unlock certificate</span>
+                        {completedVideos[course.id] && (
+                          <span style={{ color: '#28a745', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            ✅ Video Completed
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Outcomes */}
                     <div style={{ marginBottom: '1rem' }}>
                       <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', fontWeight: '600', color: '#28a745' }}>✅ You'll Learn To:</p>
@@ -202,23 +330,33 @@ function Courses() {
                 {/* Get Certificate Button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); handleCertificate(course); }}
+                  disabled={!completedVideos[course.id]}
                   style={{
                     marginTop: '0.5rem',
                     width: '100%',
                     padding: '0.75rem',
-                    backgroundColor: '#28a745',
+                    backgroundColor: completedVideos[course.id] ? '#28a745' : '#cccccc',
                     color: '#fff',
                     border: 'none',
                     borderRadius: '6px',
                     fontSize: '0.95rem',
                     fontWeight: '600',
-                    cursor: 'pointer',
+                    cursor: completedVideos[course.id] ? 'pointer' : 'not-allowed',
+                    opacity: completedVideos[course.id] ? 1 : 0.7,
                     transition: 'all 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#218838'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#28a745'}
+                  onMouseEnter={(e) => {
+                    if (completedVideos[course.id]) {
+                      e.currentTarget.style.backgroundColor = '#218838';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (completedVideos[course.id]) {
+                      e.currentTarget.style.backgroundColor = '#28a745';
+                    }
+                  }}
                 >
-                  🎓 Get Certificate
+                  {completedVideos[course.id] ? '🎓 Get Certificate' : '🔒 Watch Video to Unlock'}
                 </button>
               </div>
             ))}
