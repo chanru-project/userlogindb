@@ -90,7 +90,11 @@ Frontend will start at:
 http://localhost:5173
 
 3️⃣ Backend Setup
-=======
+cd backend
+npm install
+npm start
+http://localhost:5000
+
 # 🎓 EduFuture - Student Course Enrollment System
 
 A modern, full-stack web application for managing student enrollments, course information, and certificate generation. Built with React, Node.js, Express, and MongoDB.
