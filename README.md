@@ -93,6 +93,9 @@ http://localhost:5173
 cd backend
 npm install
 npm start
+
+backend will start at :
+
 http://localhost:5000
 
 # 🎓 EduFuture - Student Course Enrollment System
