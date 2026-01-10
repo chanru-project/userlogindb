@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+ HEAD
 📘 FutureEducation
 
 FutureEducation is a free online learning platform designed to help affordable and underprivileged people learn technology and AI-related courses at zero cost.
